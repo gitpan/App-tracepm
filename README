@@ -1,0 +1,78 @@
+NAME
+    App::tracepm - Trace dependencies of your Perl script file
+
+VERSION
+    version 0.01
+
+SYNOPSIS
+    This distribution provides command-line utility called tracepm.
+
+FUNCTIONS
+  tracepm(%args) -> [status, msg, result, meta]
+    Arguments ('*' denotes required arguments):
+
+    *   core => *bool*
+
+        Filter only modules that are in core.
+
+    *   detail => *bool* (default: 0)
+
+        Whether to return records instead of just module names.
+
+    *   perl_version => *str*
+
+        Perl version, defaults to current running version.
+
+        This is for determining which module is core (the list differs from
+        version to version. See Module::CoreList for more details.
+
+    *   script* => *str*
+
+        Path to script file (script to be packed).
+
+    *   use => *array*
+
+        Additional modules to "use".
+
+        This is like running:
+
+            perl -MModule1 -MModule2 script.pl
+
+    *   xs => *bool*
+
+        Filter only modules that are XS modules.
+
+    Return value:
+
+    Returns an enveloped result (an array).
+
+    First element (status) is an integer containing HTTP status code (200
+    means OK, 4xx caller error, 5xx function error). Second element (msg) is
+    a string containing error message, or 'OK' if status is 200. Third
+    element (result) is optional, the actual result. Fourth element (meta)
+    is called result metadata and is optional, a hash that contains extra
+    information.
+
+HOMEPAGE
+    Please visit the project's homepage at
+    <https://metacpan.org/release/App-tracepm>.
+
+SOURCE
+    Source repository is at <https://github.com/sharyanto/perl-App-tracepm>.
+
+BUGS
+    Please report any bugs or feature requests on the bugtracker website
+    <https://rt.cpan.org/Public/Dist/Display.html?Name=App-tracepm>
+
+    When submitting a bug or request, please include a test-file or a patch
+    to an existing test-file that illustrates the bug or desired feature.
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2014 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
