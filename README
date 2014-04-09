@@ -2,7 +2,7 @@ NAME
     App::tracepm - Trace dependencies of your Perl script file
 
 VERSION
-    version 0.01
+    version 0.02
 
 SYNOPSIS
     This distribution provides command-line utility called tracepm.
@@ -11,6 +11,10 @@ FUNCTIONS
   tracepm(%args) -> [status, msg, result, meta]
     Arguments ('*' denotes required arguments):
 
+    *   args => *array*
+
+        Script arguments.
+
     *   core => *bool*
 
         Filter only modules that are in core.
@@ -18,6 +22,22 @@ FUNCTIONS
     *   detail => *bool* (default: 0)
 
         Whether to return records instead of just module names.
+
+    *   method => *str* (default: "fatpacker")
+
+        Tracing method to use.
+
+        There are two tracing methods that can be used. The first (and
+        default) is "fatpacker", using "fatpacker trace". This method runs
+        the script using "perl -c" option then collect the populated %INC.
+        Only modules loaded during compile time are detected.
+
+        The second method ("require") runs your script normally, but
+        replaces "CORE::GLOBAL::require()" with a routine that logs the
+        require() argument to the log file. Modules loaded during runtime is
+        also logged. But some modules might not work, specifically modules
+        that also overrides require() (there should be only a handful of
+        modules that do this though).
 
     *   perl_version => *str*
 
