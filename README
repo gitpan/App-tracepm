@@ -2,7 +2,7 @@ NAME
     App::tracepm - Trace dependencies of your Perl script file
 
 VERSION
-    version 0.02
+    version 0.03
 
 SYNOPSIS
     This distribution provides command-line utility called tracepm.

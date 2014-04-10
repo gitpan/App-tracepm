@@ -6,7 +6,7 @@ use warnings;
 
 use Perinci::CmdLine 1.06;
 
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
 
@@ -25,7 +25,7 @@ tracepm - Trace dependencies of your Perl script file
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
@@ -42,6 +42,17 @@ version 0.02
 
 B<tracepm> runs your Perl script under C<perl -c> and lists modules being
 required. You can filter only displaying the modules matching some criteria.
+
+=head1 TODO
+
+=over
+
+=item * Option to use C<perl> instead of C<perl -c>
+
+To be able to include modules being required during run-time instead of
+compile-time.
+
+=back
 
 =head1 HOMEPAGE
 

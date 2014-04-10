@@ -11,7 +11,7 @@ use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.02'; # VERSION
+our $VERSION = '0.03'; # VERSION
 
 our %SPEC;
 
@@ -19,9 +19,10 @@ our $tablespec = {
     fields => {
         module  => {schema=>'str*' , pos=>0},
         require => {schema=>'str*' , pos=>1},
-        seq     => {schema=>'int*' , pos=>2},
-        is_xs   => {schema=>'bool' , pos=>3},
-        is_core => {schema=>'bool*', pos=>4},
+        by      => {schema=>'str*' , pos=>2},
+        seq     => {schema=>'int*' , pos=>3},
+        is_xs   => {schema=>'bool' , pos=>4},
+        is_core => {schema=>'bool*', pos=>5},
     },
     pk => 'module',
 };
@@ -136,14 +137,22 @@ sub tracepm {
     while (<$fh>) {
         chomp;
         $log->trace("got line: $_");
-        $i++;
-        my $r = {seq=>$i, require=>$_};
 
-        unless (/(.+)\.pm\z/) {
+        my $r = {};
+        $i++;
+        $r->{seq} = $i if $method eq 'require';
+
+        if (/(.+)\t(.+)/) {
+            $r->{require} = $1;
+            $r->{by} = $2;
+        } else {
+            $r->{require} = $_;
+        }
+
+        unless ($r->{require} =~ /(.+)\.pm\z/) {
             warn "Skipped non-pm entry: $_\n";
             next;
         }
-
         my $mod = $1; $mod =~ s!/!::!g;
         $r->{module} = $mod;
 
@@ -189,7 +198,7 @@ App::tracepm - Trace dependencies of your Perl script file
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
