@@ -1,8 +1,8 @@
 NAME
-    App::tracepm - Trace dependencies of your Perl script file
+    App::tracepm - Trace dependencies of your Perl script
 
 VERSION
-    version 0.03
+    version 0.04
 
 SYNOPSIS
     This distribution provides command-line utility called tracepm.
@@ -14,6 +14,10 @@ FUNCTIONS
     *   args => *array*
 
         Script arguments.
+
+    *   cache_prereqscanner => *bool* (default: 0)
+
+        Whether cache Perl::PrereqScanner{,::Lite} result.
 
     *   core => *bool*
 
@@ -27,17 +31,37 @@ FUNCTIONS
 
         Tracing method to use.
 
-        There are two tracing methods that can be used. The first (and
-        default) is "fatpacker", using "fatpacker trace". This method runs
-        the script using "perl -c" option then collect the populated %INC.
-        Only modules loaded during compile time are detected.
+        There are several tracing methods that can be used:
 
-        The second method ("require") runs your script normally, but
-        replaces "CORE::GLOBAL::require()" with a routine that logs the
-        require() argument to the log file. Modules loaded during runtime is
-        also logged. But some modules might not work, specifically modules
-        that also overrides require() (there should be only a handful of
-        modules that do this though).
+        *   "fatpacker" (the default): This method uses the same method that
+            "fatpacker trace" uses, which is running the script using "perl
+            -c" then collect the populated %INC. Only modules loaded during
+            compile time are detected.
+
+        *   "require": This method runs your script normally until it exits.
+            At the start of program, it replaces "CORE::GLOBAL::require()"
+            with a routine that logs the require() argument to the log file.
+            Modules loaded during runtime is also logged by this method. But
+            some modules might not work, specifically modules that also
+            overrides require() (there should be only a handful of modules
+            that do this though).
+
+        *   "prereqscanner": This method does not run your Perl program, but
+            statically analyze it using "Perl::PrereqScanner". Since it uses
+            "PPI", it can be rather slow.
+
+        *   "prereqscanner_recurse": Like "prereqscanner", but will recurse
+            into all non-core modules until they are exhausted. Modules that
+            are not found will be skipped. It is recommended to use the
+            various "recurse_exclude_*" options options to limit recursion.
+
+        *   "prereqscanner_lite": This method is like the "prereqscanner"
+            method, but instead of "Perl::PrereqScanner" it uses
+            "Perl::PrereqScanner::Lite". The latter does not use "PPI" but
+            use "Compiler::Lexer" which is significantly faster.
+
+        *   "prereqscanner_lite_recurse": Like "prereqscanner_lite", but
+            recurses.
 
     *   perl_version => *str*
 
@@ -45,6 +69,22 @@ FUNCTIONS
 
         This is for determining which module is core (the list differs from
         version to version. See Module::CoreList for more details.
+
+    *   recurse_exclude => *array*
+
+        When recursing, exclude some modules.
+
+    *   recurse_exclude_core => *bool*
+
+        When recursing, exclude core modules.
+
+    *   recurse_exclude_pattern => *array*
+
+        When recursing, exclude some module patterns.
+
+    *   recurse_exclude_xs => *bool*
+
+        When recursing, exclude XS modules.
 
     *   script* => *str*
 
@@ -72,6 +112,11 @@ FUNCTIONS
     element (result) is optional, the actual result. Fourth element (meta)
     is called result metadata and is optional, a hash that contains extra
     information.
+
+TODO
+    *   'use' args not yet respected if 'method' =~ /prereqscanner/
+
+    *   Option to silent STDOUT and/or STDERR output of script.
 
 HOMEPAGE
     Please visit the project's homepage at

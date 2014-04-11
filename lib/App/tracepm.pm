@@ -3,26 +3,26 @@ package App::tracepm;
 use 5.010001;
 use strict;
 use warnings;
-#use experimental 'smartmatch';
+use experimental 'smartmatch';
 use Log::Any '$log';
 
-use File::Temp qw(tempfile);
 use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.03'; # VERSION
+our $VERSION = '0.04'; # VERSION
 
 our %SPEC;
 
 our $tablespec = {
     fields => {
         module  => {schema=>'str*' , pos=>0},
-        require => {schema=>'str*' , pos=>1},
-        by      => {schema=>'str*' , pos=>2},
-        seq     => {schema=>'int*' , pos=>3},
-        is_xs   => {schema=>'bool' , pos=>4},
-        is_core => {schema=>'bool*', pos=>5},
+        version => {schema=>'str*' , pos=>1},
+        require => {schema=>'str*' , pos=>2},
+        by      => {schema=>'str*' , pos=>3},
+        seq     => {schema=>'int*' , pos=>4},
+        is_xs   => {schema=>'bool' , pos=>5},
+        is_core => {schema=>'bool*', pos=>6},
     },
     pk => 'module',
 };
@@ -38,22 +38,68 @@ $SPEC{tracepm} = {
         },
         method => {
             summary => 'Tracing method to use',
-            schema => ['str*', in=>[qw/fatpacker require/]],
+            schema => ['str*',
+                       in=>[qw/
+                                  fatpacker
+                                  require
+                                  prereqscanner
+                                  prereqscanner_lite
+                                  prereqscanner_recurse
+                                  prereqscanner_lite_recurse
+                              /]],
             default => 'fatpacker',
             description => <<'_',
 
-There are two tracing methods that can be used. The first (and default) is
-`fatpacker`, using `fatpacker trace`. This method runs the script using `perl
--c` option then collect the populated `%INC`. Only modules loaded during compile
-time are detected.
+There are several tracing methods that can be used:
 
-The second method (`require`) runs your script normally, but replaces
-`CORE::GLOBAL::require()` with a routine that logs the require() argument to the
-log file. Modules loaded during runtime is also logged. But some modules might
-not work, specifically modules that also overrides require() (there should be
-only a handful of modules that do this though).
+* `fatpacker` (the default): This method uses the same method that `fatpacker
+  trace` uses, which is running the script using `perl -c` then collect the
+  populated `%INC`. Only modules loaded during compile time are detected.
+
+* `require`: This method runs your script normally until it exits. At the start
+  of program, it replaces `CORE::GLOBAL::require()` with a routine that logs the
+  require() argument to the log file. Modules loaded during runtime is also
+  logged by this method. But some modules might not work, specifically modules
+  that also overrides require() (there should be only a handful of modules that
+  do this though).
+
+* `prereqscanner`: This method does not run your Perl program, but statically
+  analyze it using `Perl::PrereqScanner`. Since it uses `PPI`, it can be rather
+  slow.
+
+* `prereqscanner_recurse`: Like `prereqscanner`, but will recurse into all
+  non-core modules until they are exhausted. Modules that are not found will be
+  skipped. It is recommended to use the various `recurse_exclude_*` options
+  options to limit recursion.
+
+* `prereqscanner_lite`: This method is like the `prereqscanner` method, but
+  instead of `Perl::PrereqScanner` it uses `Perl::PrereqScanner::Lite`. The
+  latter does not use `PPI` but use `Compiler::Lexer` which is significantly
+  faster.
+
+* `prereqscanner_lite_recurse`: Like `prereqscanner_lite`, but recurses.
 
 _
+        },
+        cache_prereqscanner => {
+            summary => "Whether cache Perl::PrereqScanner{,::Lite} result",
+            schema => ['bool' => default=>0],
+        },
+        recurse_exclude => {
+            summary => 'When recursing, exclude some modules',
+            schema => ['array*' => of => 'str*'],
+        },
+        recurse_exclude_pattern => {
+            summary => 'When recursing, exclude some module patterns',
+            schema => ['array*' => of => 'str*'], # XXX array of re
+        },
+        recurse_exclude_xs => {
+            summary => 'When recursing, exclude XS modules',
+            schema => ['bool'],
+        },
+        recurse_exclude_core => {
+            summary => 'When recursing, exclude core modules',
+            schema => ['bool'],
         },
         args => {
             summary => 'Script arguments',
@@ -111,68 +157,178 @@ sub tracepm {
     my $method = $args{method};
     my $plver = version->parse($args{perl_version} // $^V);
 
-    my ($outfh, $outf) = tempfile();
-
-    if ($method eq 'fatpacker') {
-        require App::FatPacker;
-        my $fp = App::FatPacker->new;
-        $fp->trace(
-            output => ">>$outf",
-            use    => $args{use},
-            args   => [$args{script}, @{$args{args} // []}],
-        );
-    } else {
-        system($^X,
-               "-MApp::tracepm::Tracer=$outf",
-               (map {"-M$_"} @{$args{use} // []}),
-               $args{script}, @{$args{args} // []},
-           );
-    }
-
-    open my($fh), "<", $outf
-        or die "Can't open trace output: $!";
-
-    my @res;
-    my $i = 0;
-    while (<$fh>) {
-        chomp;
-        $log->trace("got line: $_");
-
-        my $r = {};
-        $i++;
-        $r->{seq} = $i if $method eq 'require';
-
-        if (/(.+)\t(.+)/) {
-            $r->{require} = $1;
-            $r->{by} = $2;
-        } else {
-            $r->{require} = $_;
-        }
-
-        unless ($r->{require} =~ /(.+)\.pm\z/) {
-            warn "Skipped non-pm entry: $_\n";
-            next;
-        }
-        my $mod = $1; $mod =~ s!/!::!g;
-        $r->{module} = $mod;
-
+    my $add_fields_and_filter_1 = sub {
+        my $r = shift;
         if ($args{detail} || defined($args{core})) {
-            my $is_core = Module::CoreList::is_core($mod, undef, $plver);
-            next if defined($args{core}) && ($args{core} xor $is_core);
+            my $is_core = Module::CoreList::is_core(
+                $r->{module}, undef, $plver);
+            return 0 if defined($args{core}) && ($args{core} xor $is_core);
             $r->{is_core} = $is_core;
         }
 
         if ($args{detail} || defined($args{xs})) {
-            my $is_xs = is_xs($mod);
-            next if defined($args{xs}) && (
+            my $is_xs = is_xs($r->{module});
+            return 0 if defined($args{xs}) && (
                 !defined($is_xs) || ($args{xs} xor $is_xs));
             $r->{is_xs} = $is_xs;
         }
+        1;
+    };
 
-        push @res, $r;
-    }
+    my @res;
+    if ($method =~ /\A(fatpacker|require)\z/) {
 
-    unlink $outf;
+        require File::Temp;
+        my ($outfh, $outf) = File::Temp::tempfile();
+
+        if ($method eq 'fatpacker') {
+            require App::FatPacker;
+            my $fp = App::FatPacker->new;
+            $fp->trace(
+                output => ">>$outf",
+                use    => $args{use},
+                args   => [$args{script}, @{$args{args} // []}],
+            );
+        } else {
+            # 'require' method
+            system($^X,
+                   "-MApp::tracepm::Tracer=$outf",
+                   (map {"-M$_"} @{$args{use} // []}),
+                   $args{script}, @{$args{args} // []},
+               );
+        }
+
+        open my($fh), "<", $outf
+            or die "Can't open trace output: $!";
+
+        my $i = 0;
+        while (<$fh>) {
+            chomp;
+            $log->trace("got line: $_");
+
+            my $r = {};
+            $i++;
+            $r->{seq} = $i if $method eq 'require';
+
+            if (/(.+)\t(.+)/) {
+                $r->{require} = $1;
+                $r->{by} = $2;
+            } else {
+                $r->{require} = $_;
+            }
+
+            unless ($r->{require} =~ /(.+)\.pm\z/) {
+                warn "Skipped non-pm entry: $_\n";
+                next;
+            }
+            my $mod = $1; $mod =~ s!/!::!g;
+            $r->{module} = $mod;
+
+            next unless $add_fields_and_filter_1->($r);
+            push @res, $r;
+        }
+
+        unlink $outf;
+
+    } elsif ($method =~ /\A(?:prereqscanner|prereqscanner_lite)(_recurse)?\z/) {
+
+        require CHI;
+        require Module::Path;
+
+        my @recurse_blacklist = (
+            'Module::List', # segfaults on my pc
+        );
+
+        my $chi = CHI->new(driver => $args{cache_prereqscanner} ? "File" : "Null");
+
+        my $recurse = $1 ? 1:0;
+        my %seen_mods; # for limiting recursion
+
+        my $scanner;
+        my $scan;
+        $scan = sub {
+            my $file = shift;
+            $log->infof("Scanning %s ...", $file);
+            my $cache_key = "tracepm-$method-$file";
+            my $sres = $chi->compute(
+                $cache_key, "24h", # XXX cache should check timestamp
+                sub { $scanner->scan_file($file) },
+            );
+            my $reqs = $sres->{requirements};
+
+            my @new; # new modules to check
+          MOD:
+            for my $mod (keys %$reqs) {
+                next if $mod =~ /\A(perl)\z/;
+                my $req = $reqs->{$mod};
+                my $v = $req->{minimum}{original};
+                my $r = {module=>$mod, version=>$v};
+
+              CHECK_RECURSE:
+                {
+                    last unless $recurse;
+                    last MOD if $seen_mods{$mod}++;
+                    my $path = Module::Path::module_path($mod);
+                    unless ($path) {
+                        $log->infof("Skipped recursing to %s: path not found", $mod);
+                        last;
+                    }
+                    if ($mod ~~ @recurse_blacklist) {
+                        $log->infof("Skipped recursing to %s: excluded by hard-coded blacklist", $mod);
+                        last;
+                    }
+                    if ($args{recurse_exclude}) {
+                        if ($mod ~~ @{ $args{recurse_exclude} }) {
+                            $log->infof("Skipped recursing to %s: excluded by list", $mod);
+                            last;
+                        }
+                    }
+                    if ($args{recurse_exclude_pattern}) {
+                        for (@{ $args{recurse_exclude_pattern} }) {
+                            if ($mod =~ /$_/) {
+                                $log->infof("Skipped recursing to %s: excluded by pattern %s", $mod, $_);
+                                last CHECK_RECURSE;
+                            }
+                        }
+                    }
+                    if ($args{recurse_exclude_core}) {
+                        my $is_core = Module::CoreList::is_core(
+                            $mod, undef, $plver); # XXX use $v?
+                        if ($is_core) {
+                            $log->infof("Skipped recursing to %s: core module", $mod);
+                        }
+                    }
+                    if ($args{recurse_exclude_xs}) {
+                        my $is_xs = is_xs($mod);
+                        if ($is_xs) {
+                            $log->infof("Skipped recursing to %s: XS module", $mod);
+                            last;
+                        }
+                    }
+                    push @new, $path;
+                }
+
+                next unless $add_fields_and_filter_1->($r);
+                push @res, $r;
+            }
+            if (@new) {
+                $log->debugf("Recursively scanning %s ...", join(", ", @new));
+                $scan->($_) for @new;
+            }
+        };
+
+        my $sres;
+        if ($method eq 'prereqscanner') {
+            require Perl::PrereqScanner;
+            $scanner = Perl::PrereqScanner->new;
+        } else {
+            # 'prereqscanner_lite' method
+            require Perl::PrereqScanner::Lite;
+            $scanner = Perl::PrereqScanner::Lite->new;
+        }
+        $scan->($args{script});
+
+    } # if method
 
     unless ($args{detail}) {
         @res = map {$_->{module}} @res;
@@ -184,7 +340,7 @@ sub tracepm {
 }
 
 1;
-# ABSTRACT: Trace dependencies of your Perl script file
+# ABSTRACT: Trace dependencies of your Perl script
 
 __END__
 
@@ -194,11 +350,11 @@ __END__
 
 =head1 NAME
 
-App::tracepm - Trace dependencies of your Perl script file
+App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
@@ -217,6 +373,10 @@ Arguments ('*' denotes required arguments):
 
 Script arguments.
 
+=item * B<cache_prereqscanner> => I<bool> (default: 0)
+
+Whether cache Perl::PrereqScanner{,::Lite} result.
+
 =item * B<core> => I<bool>
 
 Filter only modules that are in core.
@@ -229,16 +389,62 @@ Whether to return records instead of just module names.
 
 Tracing method to use.
 
-There are two tracing methods that can be used. The first (and default) is
-C<fatpacker>, using C<fatpacker trace>. This method runs the script using C<perl
--c> option then collect the populated C<%INC>. Only modules loaded during compile
-time are detected.
+There are several tracing methods that can be used:
 
-The second method (C<require>) runs your script normally, but replaces
-C<CORE::GLOBAL::require()> with a routine that logs the require() argument to the
-log file. Modules loaded during runtime is also logged. But some modules might
-not work, specifically modules that also overrides require() (there should be
-only a handful of modules that do this though).
+=over
+
+=item *
+
+C<fatpacker> (the default): This method uses the same method that C<fatpacker
+  trace> uses, which is running the script using C<perl -c> then collect the
+  populated C<%INC>. Only modules loaded during compile time are detected.
+
+
+
+=item *
+
+C<require>: This method runs your script normally until it exits. At the start
+  of program, it replaces C<CORE::GLOBAL::require()> with a routine that logs the
+  require() argument to the log file. Modules loaded during runtime is also
+  logged by this method. But some modules might not work, specifically modules
+  that also overrides require() (there should be only a handful of modules that
+  do this though).
+
+
+
+=item *
+
+C<prereqscanner>: This method does not run your Perl program, but statically
+  analyze it using C<Perl::PrereqScanner>. Since it uses C<PPI>, it can be rather
+  slow.
+
+
+
+=item *
+
+C<prereqscanner_recurse>: Like C<prereqscanner>, but will recurse into all
+  non-core modules until they are exhausted. Modules that are not found will be
+  skipped. It is recommended to use the various C<recurse_exclude_*> options
+  options to limit recursion.
+
+
+
+=item *
+
+C<prereqscanner_lite>: This method is like the C<prereqscanner> method, but
+  instead of C<Perl::PrereqScanner> it uses C<Perl::PrereqScanner::Lite>. The
+  latter does not use C<PPI> but use C<Compiler::Lexer> which is significantly
+  faster.
+
+
+
+=item *
+
+C<prereqscanner_lite_recurse>: Like C<prereqscanner_lite>, but recurses.
+
+
+
+=back
 
 =item * B<perl_version> => I<str>
 
@@ -246,6 +452,22 @@ Perl version, defaults to current running version.
 
 This is for determining which module is core (the list differs from version to
 version. See Module::CoreList for more details.
+
+=item * B<recurse_exclude> => I<array>
+
+When recursing, exclude some modules.
+
+=item * B<recurse_exclude_core> => I<bool>
+
+When recursing, exclude core modules.
+
+=item * B<recurse_exclude_pattern> => I<array>
+
+When recursing, exclude some module patterns.
+
+=item * B<recurse_exclude_xs> => I<bool>
+
+When recursing, exclude XS modules.
 
 =item * B<script>* => I<str>
 
@@ -277,6 +499,16 @@ element (meta) is called result metadata and is optional, a hash
 that contains extra information.
 
 =for Pod::Coverage ^()$
+
+=head1 TODO
+
+=over
+
+=item * 'use' args not yet respected if 'method' =~ /prereqscanner/
+
+=item * Option to silent STDOUT and/or STDERR output of script.
+
+=back
 
 =head1 HOMEPAGE
 

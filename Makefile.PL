@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker 6.30;
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Trace dependencies of your Perl script file",
+  "ABSTRACT" => "Trace dependencies of your Perl script",
   "AUTHOR" => "Steven Haryanto <stevenharyanto\@gmail.com>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
@@ -24,9 +24,14 @@ my %WriteMakefileArgs = (
   "NAME" => "App::tracepm",
   "PREREQ_PM" => {
     "App::FatPacker" => 0,
+    "CHI" => 0,
     "Log::Any" => 0,
+    "Module::Path" => 0,
     "Perinci::CmdLine" => "1.06",
-    "SHARYANTO::Module::Util" => 0
+    "Perl::PrereqScanner" => 0,
+    "Perl::PrereqScanner::Lite" => 0,
+    "SHARYANTO::Module::Util" => 0,
+    "experimental" => 0
   },
   "TEST_REQUIRES" => {
     "File::Spec" => 0,
@@ -34,7 +39,7 @@ my %WriteMakefileArgs = (
     "IPC::Open3" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.03",
+  "VERSION" => "0.04",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -43,13 +48,18 @@ my %WriteMakefileArgs = (
 
 my %FallbackPrereqs = (
   "App::FatPacker" => 0,
+  "CHI" => 0,
   "File::Spec" => 0,
   "IO::Handle" => 0,
   "IPC::Open3" => 0,
   "Log::Any" => 0,
+  "Module::Path" => 0,
   "Perinci::CmdLine" => "1.06",
+  "Perl::PrereqScanner" => 0,
+  "Perl::PrereqScanner::Lite" => 0,
   "SHARYANTO::Module::Util" => 0,
-  "Test::More" => 0
+  "Test::More" => 0,
+  "experimental" => 0
 );
 
 

@@ -1,5 +1,5 @@
 ---
-abstract: 'Trace dependencies of your Perl script file'
+abstract: 'Trace dependencies of your Perl script'
 author:
   - 'Steven Haryanto <stevenharyanto@gmail.com>'
 build_requires:
@@ -18,15 +18,20 @@ meta-spec:
 name: App-tracepm
 requires:
   App::FatPacker: '0'
+  CHI: '0'
   Log::Any: '0'
+  Module::Path: '0'
   Perinci::CmdLine: '1.06'
+  Perl::PrereqScanner: '0'
+  Perl::PrereqScanner::Lite: '0'
   SHARYANTO::Module::Util: '0'
+  experimental: '0'
   perl: '5.010001'
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=App-tracepm
   homepage: https://metacpan.org/release/App-tracepm
   repository: git://github.com/sharyanto/perl-App-tracepm.git
-version: '0.03'
+version: '0.04'
 x_Dist_Zilla:
   perl:
     version: '5.018002'
