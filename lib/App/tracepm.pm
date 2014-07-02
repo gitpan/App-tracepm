@@ -10,7 +10,7 @@ use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.04'; # VERSION
+our $VERSION = '0.05'; # VERSION
 
 our %SPEC;
 
@@ -354,7 +354,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-version 0.04
+This document describes version 0.05 of App::tracepm (from Perl distribution App-tracepm), released on 2014-07-02.
 
 =head1 SYNOPSIS
 
