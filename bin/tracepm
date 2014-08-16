@@ -1,17 +1,23 @@
 #!perl
 
+# Note: This script is a CLI interface to Riap function /App/tracepm/tracepm
+# and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.01
+
+our $DATE = '2014-08-16'; # DATE
+our $VERSION = '0.06'; # VERSION
+
 use 5.010001;
 use strict;
 use warnings;
 
-use Perinci::CmdLine 1.06;
+use Perinci::CmdLine;
 
-our $VERSION = '0.05'; # VERSION
+Perinci::CmdLine->new(
+    url => "/App/tracepm/tracepm",
+)->run;
 
-Perinci::CmdLine->new(url => '/App/tracepm/tracepm')->run;
-
-#ABSTRACT: Trace dependencies of your Perl script
-#PODNAME: tracepm
+# ABSTRACT: tracepm
+# PODNAME: tracepm
 
 __END__
 
@@ -21,27 +27,31 @@ __END__
 
 =head1 NAME
 
-tracepm - Trace dependencies of your Perl script
+tracepm - tracepm
 
 =head1 VERSION
 
-This document describes version 0.05 of tracepm (from Perl distribution App-tracepm), released on 2014-07-02.
+This document describes version 0.06 of tracepm (from Perl distribution App-tracepm), released on 2014-08-16.
 
 =head1 SYNOPSIS
 
- # trace Perl modules being required
- % tracepm script.pl
+Usage:
 
- # use Perl::PrereqScanner::Lite, only list non-core+XS modules
- % tracepm --method prereqscanner_lite --xs --nocore script.pl
+ % tracepm
 
- # see more options
+Examples:
+
+ TODO
+
+To see all options:
+
  % tracepm --help
 
 =head1 DESCRIPTION
 
-B<tracepm> traces dependencies (required Perl modules) of your Perl scripts
-using one of several available methods.
+=head1 OPTIONS
+
+ TODO
 
 =head1 HOMEPAGE
 

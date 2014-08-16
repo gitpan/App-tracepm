@@ -10,7 +10,7 @@ use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.05'; # VERSION
+our $VERSION = '0.06'; # VERSION
 
 our %SPEC;
 
@@ -354,7 +354,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.05 of App::tracepm (from Perl distribution App-tracepm), released on 2014-07-02.
+This document describes version 0.06 of App::tracepm (from Perl distribution App-tracepm), released on 2014-08-16.
 
 =head1 SYNOPSIS
 
@@ -393,56 +393,32 @@ There are several tracing methods that can be used:
 
 =over
 
-=item *
+=item * C<fatpacker> (the default): This method uses the same method that C<fatpacker
+trace> uses, which is running the script using C<perl -c> then collect the
+populated C<%INC>. Only modules loaded during compile time are detected.
 
-C<fatpacker> (the default): This method uses the same method that C<fatpacker
-  trace> uses, which is running the script using C<perl -c> then collect the
-  populated C<%INC>. Only modules loaded during compile time are detected.
+=item * C<require>: This method runs your script normally until it exits. At the start
+of program, it replaces C<CORE::GLOBAL::require()> with a routine that logs the
+require() argument to the log file. Modules loaded during runtime is also
+logged by this method. But some modules might not work, specifically modules
+that also overrides require() (there should be only a handful of modules that
+do this though).
 
+=item * C<prereqscanner>: This method does not run your Perl program, but statically
+analyze it using C<Perl::PrereqScanner>. Since it uses C<PPI>, it can be rather
+slow.
 
+=item * C<prereqscanner_recurse>: Like C<prereqscanner>, but will recurse into all
+non-core modules until they are exhausted. Modules that are not found will be
+skipped. It is recommended to use the various C<recurse_exclude_*> options
+options to limit recursion.
 
-=item *
+=item * C<prereqscanner_lite>: This method is like the C<prereqscanner> method, but
+instead of C<Perl::PrereqScanner> it uses C<Perl::PrereqScanner::Lite>. The
+latter does not use C<PPI> but use C<Compiler::Lexer> which is significantly
+faster.
 
-C<require>: This method runs your script normally until it exits. At the start
-  of program, it replaces C<CORE::GLOBAL::require()> with a routine that logs the
-  require() argument to the log file. Modules loaded during runtime is also
-  logged by this method. But some modules might not work, specifically modules
-  that also overrides require() (there should be only a handful of modules that
-  do this though).
-
-
-
-=item *
-
-C<prereqscanner>: This method does not run your Perl program, but statically
-  analyze it using C<Perl::PrereqScanner>. Since it uses C<PPI>, it can be rather
-  slow.
-
-
-
-=item *
-
-C<prereqscanner_recurse>: Like C<prereqscanner>, but will recurse into all
-  non-core modules until they are exhausted. Modules that are not found will be
-  skipped. It is recommended to use the various C<recurse_exclude_*> options
-  options to limit recursion.
-
-
-
-=item *
-
-C<prereqscanner_lite>: This method is like the C<prereqscanner> method, but
-  instead of C<Perl::PrereqScanner> it uses C<Perl::PrereqScanner::Lite>. The
-  latter does not use C<PPI> but use C<Compiler::Lexer> which is significantly
-  faster.
-
-
-
-=item *
-
-C<prereqscanner_lite_recurse>: Like C<prereqscanner_lite>, but recurses.
-
-
+=item * C<prereqscanner_lite_recurse>: Like C<prereqscanner_lite>, but recurses.
 
 =back
 
@@ -479,7 +455,7 @@ Additional modules to "use".
 
 This is like running:
 
-    perl -MModule1 -MModule2 script.pl
+ perl -MModule1 -MModule2 script.pl
 
 =item * B<xs> => I<bool>
 
@@ -497,6 +473,8 @@ First element (status) is an integer containing HTTP status code
 200. Third element (result) is optional, the actual result. Fourth
 element (meta) is called result metadata and is optional, a hash
 that contains extra information.
+
+ (any)
 
 =for Pod::Coverage ^()$
 
