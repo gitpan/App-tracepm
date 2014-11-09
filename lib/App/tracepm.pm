@@ -10,7 +10,7 @@ use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.06'; # VERSION
+our $VERSION = '0.07'; # VERSION
 
 our %SPEC;
 
@@ -354,7 +354,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.06 of App::tracepm (from Perl distribution App-tracepm), released on 2014-08-16.
+This document describes version 0.07 of App::tracepm (from Perl distribution App-tracepm), released on 2014-11-09.
 
 =head1 SYNOPSIS
 
@@ -506,11 +506,11 @@ feature.
 
 =head1 AUTHOR
 
-Steven Haryanto <stevenharyanto@gmail.com>
+perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by Steven Haryanto.
+This software is copyright (c) 2014 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

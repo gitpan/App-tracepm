@@ -1,19 +1,20 @@
 #!perl
 
 # Note: This script is a CLI interface to Riap function /App/tracepm/tracepm
-# and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.01
+# and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.02
 
-our $DATE = '2014-08-16'; # DATE
-our $VERSION = '0.06'; # VERSION
+our $DATE = '2014-11-09'; # DATE
+our $VERSION = '0.07'; # VERSION
 
 use 5.010001;
 use strict;
 use warnings;
 
-use Perinci::CmdLine;
+use Perinci::CmdLine::Any -prefer_lite=>1;
 
-Perinci::CmdLine->new(
+Perinci::CmdLine::Any->new(
     url => "/App/tracepm/tracepm",
+    log => 1,
 )->run;
 
 # ABSTRACT: tracepm
@@ -31,7 +32,7 @@ tracepm - tracepm
 
 =head1 VERSION
 
-This document describes version 0.06 of tracepm (from Perl distribution App-tracepm), released on 2014-08-16.
+This document describes version 0.07 of tracepm (from Perl distribution App-tracepm), released on 2014-11-09.
 
 =head1 SYNOPSIS
 
@@ -47,11 +48,21 @@ To see all options:
 
  % tracepm --help
 
-=head1 DESCRIPTION
-
 =head1 OPTIONS
 
  TODO
+
+=head1 BASH COMPLETION
+
+This script has bash completion capability.
+
+To activate bash completion for this script, put:
+
+ complete -C tracepm tracepm
+
+in your bash startup (e.g. C<~/.bashrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
+
+You can also install L<App::BashCompletionProg> which makes it easy to add completion for Perinci::CmdLine-based scripts. Just execute C<bash-completion-prog> and the C<complete> command will be added in your C<~/.bash-completion-prog>. Your next shell session will then recognize tab completion for the command.
 
 =head1 HOMEPAGE
 
@@ -71,11 +82,11 @@ feature.
 
 =head1 AUTHOR
 
-Steven Haryanto <stevenharyanto@gmail.com>
+perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by Steven Haryanto.
+This software is copyright (c) 2014 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
