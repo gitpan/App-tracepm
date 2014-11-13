@@ -10,7 +10,7 @@ use Module::CoreList;
 use SHARYANTO::Module::Util qw(is_xs);
 use version;
 
-our $VERSION = '0.07'; # VERSION
+our $VERSION = '0.08'; # VERSION
 
 our %SPEC;
 
@@ -328,6 +328,10 @@ sub tracepm {
         }
         $scan->($args{script});
 
+    } else {
+
+        return [400, "Unknown trace method '$method'"];
+
     } # if method
 
     unless ($args{detail}) {
@@ -354,7 +358,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.07 of App::tracepm (from Perl distribution App-tracepm), released on 2014-11-09.
+This document describes version 0.08 of App::tracepm (from Perl distribution App-tracepm), released on 2014-11-13.
 
 =head1 SYNOPSIS
 
@@ -494,7 +498,7 @@ Please visit the project's homepage at L<https://metacpan.org/release/App-tracep
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/sharyanto/perl-App-tracepm>.
+Source repository is at L<https://github.com/perlancar/perl-App-tracepm>.
 
 =head1 BUGS
 

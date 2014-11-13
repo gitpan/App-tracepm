@@ -10,7 +10,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: '6.30'
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.141520'
+generated_by: 'Dist::Zilla version 5.019, CPAN::Meta::Converter version 2.141170'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -31,8 +31,8 @@ requires:
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=App-tracepm
   homepage: https://metacpan.org/release/App-tracepm
-  repository: git://github.com/sharyanto/perl-App-tracepm.git
-version: '0.07'
+  repository: git://github.com/perlancar/perl-App-tracepm.git
+version: '0.08'
 x_Dist_Zilla:
   perl:
     version: '5.018002'
@@ -123,7 +123,7 @@ x_Dist_Zilla:
     -
       class: Dist::Zilla::Plugin::Rinci::InstallCompletion
       name: '@Author::PERLANCAR/Rinci::InstallCompletion'
-      version: '0.01'
+      version: '0.03'
     -
       class: Dist::Zilla::Plugin::OurDate
       name: '@Author::PERLANCAR/OurDate'
@@ -193,9 +193,13 @@ x_Dist_Zilla:
               name: '@Author::PERLANCAR/postlude'
               version: '4.006'
             -
+              class: Pod::Weaver::Section::BashCompletion::GetoptLongComplete
+              name: '@Author::PERLANCAR/BashCompletion::GetoptLongComplete'
+              version: '0.01'
+            -
               class: Pod::Weaver::Section::BashCompletion::PerinciCmdLine
               name: '@Author::PERLANCAR/BashCompletion::PerinciCmdLine'
-              version: '0.02'
+              version: '0.03'
             -
               class: Pod::Weaver::Section::Homepage::DefaultCPAN
               name: '@Author::PERLANCAR/Homepage::DefaultCPAN'
@@ -256,7 +260,7 @@ x_Dist_Zilla:
           script_finder:
             - ':ExecFiles'
       name: '@Author::PERLANCAR/Test::Compile'
-      version: '2.043'
+      version: '2.040'
     -
       class: Dist::Zilla::Plugin::Test::Rinci
       name: '@Author::PERLANCAR/Test::Rinci'
