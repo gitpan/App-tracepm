@@ -1,5 +1,8 @@
 package App::tracepm;
 
+our $DATE = '2014-12-04'; # DATE
+our $VERSION = '0.09'; # VERSION
+
 use 5.010001;
 use strict;
 use warnings;
@@ -7,10 +10,8 @@ use experimental 'smartmatch';
 use Log::Any '$log';
 
 use Module::CoreList;
-use SHARYANTO::Module::Util qw(is_xs);
+use Module::MoreUtil qw(is_xs);
 use version;
-
-our $VERSION = '0.08'; # VERSION
 
 our %SPEC;
 
@@ -358,7 +359,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.08 of App::tracepm (from Perl distribution App-tracepm), released on 2014-11-13.
+This document describes version 0.09 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-04.
 
 =head1 SYNOPSIS
 
@@ -498,7 +499,7 @@ Please visit the project's homepage at L<https://metacpan.org/release/App-tracep
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/perlancar/perl-App-tracepm>.
+Source repository is at L<https://github.com/sharyanto/perl-App-tracepm>.
 
 =head1 BUGS
 

@@ -1,10 +1,10 @@
 #!perl
 
 # Note: This script is a CLI interface to Riap function /App/tracepm/tracepm
-# and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.02
+# and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.03
 
-our $DATE = '2014-11-13'; # DATE
-our $VERSION = '0.08'; # VERSION
+our $DATE = '2014-12-04'; # DATE
+our $VERSION = '0.09'; # VERSION
 
 use 5.010001;
 use strict;
@@ -32,29 +32,246 @@ tracepm - tracepm
 
 =head1 VERSION
 
-This document describes version 0.08 of tracepm (from Perl distribution App-tracepm), released on 2014-11-13.
+This document describes version 0.09 of tracepm (from Perl distribution App-tracepm), released on 2014-12-04.
 
 =head1 SYNOPSIS
 
 Usage:
 
- % tracepm
-
-Examples:
-
- TODO
-
-To see all options:
-
- % tracepm --help
+ % tracepm [options] <script> [args]
 
 =head1 OPTIONS
 
- TODO
+C<*> marks required options.
 
-=head1 BASH COMPLETION
+=head2 Field-selection options
 
-This script has bash completion capability.
+=over
+
+=item B<--detail>
+
+Whether to return records instead of just module names.
+
+=back
+
+=head2 Filtering options
+
+=over
+
+=item B<--core>
+
+Filter only modules that are in core.
+
+=item B<--xs>
+
+Filter only modules that are XS modules.
+
+=back
+
+=head2 General options
+
+=over
+
+=item B<--args-json>=I<s>
+
+Script arguments (JSON-encoded).
+
+See C<--args>.
+
+=item B<--args>=I<s@>
+
+Script arguments.
+
+Can be specified multiple times.
+
+=item B<--cache-prereqscanner>
+
+Whether cache Perl::PrereqScanner{,::Lite} result.
+
+=item B<--config-path>=I<s>
+
+Set path to configuration file.
+
+Can be specified multiple times.
+
+=item B<--config-profile>=I<s>
+
+Set configuration profile to use.
+
+=item B<--debug>
+
+Set log level to 'debug'.
+
+=item B<--format>=I<s>
+
+Set output format.
+
+=item B<--help>, B<-h>, B<-?>
+
+Show help message.
+
+=item B<--json>
+
+Set output format to json.
+
+=item B<--log-level>=I<s>
+
+Set log level.
+
+=item B<--method>=I<s>
+
+Tracing method to use.
+
+Default value:
+
+ "fatpacker"
+
+Valid values:
+
+ ["fatpacker", "require", "prereqscanner", "prereqscanner_lite", "prereqscanner_recurse", "prereqscanner_lite_recurse"]
+
+There are several tracing methods that can be used:
+
+* `fatpacker` (the default): This method uses the same method that `fatpacker
+  trace` uses, which is running the script using `perl -c` then collect the
+  populated `%INC`. Only modules loaded during compile time are detected.
+
+* `require`: This method runs your script normally until it exits. At the start
+  of program, it replaces `CORE::GLOBAL::require()` with a routine that logs the
+  require() argument to the log file. Modules loaded during runtime is also
+  logged by this method. But some modules might not work, specifically modules
+  that also overrides require() (there should be only a handful of modules that
+  do this though).
+
+* `prereqscanner`: This method does not run your Perl program, but statically
+  analyze it using `Perl::PrereqScanner`. Since it uses `PPI`, it can be rather
+  slow.
+
+* `prereqscanner_recurse`: Like `prereqscanner`, but will recurse into all
+  non-core modules until they are exhausted. Modules that are not found will be
+  skipped. It is recommended to use the various `recurse_exclude_*` options
+  options to limit recursion.
+
+* `prereqscanner_lite`: This method is like the `prereqscanner` method, but
+  instead of `Perl::PrereqScanner` it uses `Perl::PrereqScanner::Lite`. The
+  latter does not use `PPI` but use `Compiler::Lexer` which is significantly
+  faster.
+
+* `prereqscanner_lite_recurse`: Like `prereqscanner_lite`, but recurses.
+
+
+=item B<--naked-res>
+
+When outputing as JSON, strip result envelope.
+
+By default, when outputing as JSON, the full enveloped result is returned, e.g.:
+
+    [200,"OK",[1,2,3],{"func.extra"=>4}]
+
+The reason is so you can get the status (1st element), status message (2nd
+element) as well as result metadata/extra result (4th element) instead of just
+the result (3rd element). However, sometimes you want just the result, e.g. when
+you want to pipe the result for more post-processing:
+
+    [1,2,3]
+
+In this case, you can use `--naked-res`.
+
+
+=item B<--no-config>
+
+Do not use any configuration file.
+
+=item B<--perl-version>=I<s>, B<-V>
+
+Perl version, defaults to current running version.
+
+This is for determining which module is core (the list differs from version to
+version. See Module::CoreList for more details.
+
+
+=item B<--quiet>
+
+Set log level to 'error'.
+
+=item B<--recurse-exclude-core>
+
+When recursing, exclude core modules.
+
+=item B<--recurse-exclude-json>=I<s>
+
+When recursing, exclude some modules (JSON-encoded).
+
+See C<--recurse-exclude>.
+
+=item B<--recurse-exclude-pattern-json>=I<s>
+
+When recursing, exclude some module patterns (JSON-encoded).
+
+See C<--recurse-exclude-pattern>.
+
+=item B<--recurse-exclude-pattern>=I<s@>
+
+When recursing, exclude some module patterns.
+
+Can be specified multiple times.
+
+=item B<--recurse-exclude-xs>
+
+When recursing, exclude XS modules.
+
+=item B<--recurse-exclude>=I<s@>
+
+When recursing, exclude some modules.
+
+Can be specified multiple times.
+
+=item B<--script>=I<s>*
+
+Path to script file (script to be packed).
+
+=item B<--trace>
+
+Set log level to 'trace'.
+
+=item B<--use-json>=I<s>
+
+Additional modules to "use" (JSON-encoded).
+
+See C<--use>.
+
+=item B<--use>=I<s@>
+
+Additional modules to "use".
+
+This is like running:
+
+    perl -MModule1 -MModule2 script.pl
+
+
+Can be specified multiple times.
+
+=item B<--verbose>
+
+Set log level to 'info'.
+
+=item B<--version>, B<-v>
+
+Show program version.
+
+=back
+
+=head1 FILES
+
+B</etc/tracepm.conf>
+
+B<~/tracepm.conf>
+
+=head1 COMPLETION
+
+This script has shell tab completion capability with support for several shells.
+
+=head2 bash
 
 To activate bash completion for this script, put:
 
@@ -64,13 +281,39 @@ in your bash startup (e.g. C<~/.bashrc>). Your next shell session will then reco
 
 You can also install L<App::BashCompletionProg> which makes it easy to add completion for Perinci::CmdLine-based scripts. After you install the module and put C<. ~/.bash-complete-prog> (or C<. /etc/bash-complete-prog>), you can just run C<bash-completion-prog> and the C<complete> command will be added to your C<~/.bash-completion-prog>. Your next shell session will then recognize tab completion for the command.
 
+=head2 fish
+
+To activate fish completion for this script, execute:
+
+ begin; set -lx COMP_SHELL fish; set -lx COMP_MODE gen_command; tracepm; end > $HOME/.config/fish/completions/tracepm.fish
+
+Or if you want to install globally, you can instead write the generated script to C</etc/fish/completions/tracepm.fish> or C</usr/share/fish/completions/tracepm.fish>. The exact path might be different on your system. Please check your C<fish_complete_path> variable.
+
+=head2 tcsh
+
+To activate tcsh completion for this script, put:
+
+ complete tracepm 'p/*/`tracepm`/'
+
+in your tcsh startup (e.g. C<~/.tcshrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
+
+=head2 zsh
+
+To activate zsh completion for this script, put:
+
+ _tracepm() { read -l; local cl="$REPLY"; read -ln; local cp="$REPLY"; reply=(`COMP_SHELL=zsh COMP_LINE="$cl" COMP_POINT="$cp" tracepm`) }
+
+ compctl -K _tracepm tracepm
+
+in your zsh startup (e.g. C<~/.zshrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
+
 =head1 HOMEPAGE
 
 Please visit the project's homepage at L<https://metacpan.org/release/App-tracepm>.
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/perlancar/perl-App-tracepm>.
+Source repository is at L<https://github.com/sharyanto/perl-App-tracepm>.
 
 =head1 BUGS
 
