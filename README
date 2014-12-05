@@ -2,8 +2,8 @@ NAME
     App::tracepm - Trace dependencies of your Perl script
 
 VERSION
-    This document describes version 0.09 of App::tracepm (from Perl
-    distribution App-tracepm), released on 2014-12-04.
+    This document describes version 0.10 of App::tracepm (from Perl
+    distribution App-tracepm), released on 2014-12-05.
 
 SYNOPSIS
     This distribution provides command-line utility called tracepm.
@@ -126,7 +126,7 @@ HOMEPAGE
     <https://metacpan.org/release/App-tracepm>.
 
 SOURCE
-    Source repository is at <https://github.com/sharyanto/perl-App-tracepm>.
+    Source repository is at <https://github.com/perlancar/perl-App-tracepm>.
 
 BUGS
     Please report any bugs or feature requests on the bugtracker website
