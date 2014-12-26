@@ -9,6 +9,7 @@ build_requires:
   Test::More: '0'
 configure_requires:
   ExtUtils::MakeMaker: '0'
+  Perl::osnames: '0.09'
 dynamic_config: 0
 generated_by: 'Dist::Zilla version 5.025, CPAN::Meta::Converter version 2.143240'
 license: perl
@@ -20,6 +21,7 @@ requires:
   App::FatPacker: '0'
   CHI: '0'
   Log::Any: '0'
+  Module::CoreList: '2.99'
   Module::Path: '0'
   Module::XSOrPP: '0'
   Perinci::CmdLine::Any: '0.06'
@@ -32,7 +34,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=App-tracepm
   homepage: https://metacpan.org/release/App-tracepm
   repository: git://github.com/perlancar/perl-App-tracepm.git
-version: '0.10'
+version: '0.11'
 x_Dist_Zilla:
   perl:
     version: '5.018002'
@@ -110,6 +112,14 @@ x_Dist_Zilla:
       name: '@Author::PERLANCAR/@Filter/UploadToCPAN'
       version: '5.025'
     -
+      class: Dist::Zilla::Plugin::Rinci::AbstractFromMeta
+      name: '@Author::PERLANCAR/Rinci::AbstractFromMeta'
+      version: '0.06'
+    -
+      class: Dist::Zilla::Plugin::PodnameFromFilename
+      name: '@Author::PERLANCAR/PodnameFromFilename'
+      version: '0.01'
+    -
       class: Dist::Zilla::Plugin::PERLANCAR::MetaResources
       name: '@Author::PERLANCAR/PERLANCAR::MetaResources'
       version: '0.03'
@@ -130,13 +140,13 @@ x_Dist_Zilla:
       name: '@Author::PERLANCAR/MetaConfig'
       version: '5.025'
     -
-      class: Dist::Zilla::Plugin::Rinci::InstallCompletion
-      name: '@Author::PERLANCAR/Rinci::InstallCompletion'
-      version: '0.03'
+      class: Dist::Zilla::Plugin::GenShellCompletion
+      name: '@Author::PERLANCAR/GenShellCompletion'
+      version: '0.07'
     -
       class: Dist::Zilla::Plugin::OurDate
       name: '@Author::PERLANCAR/OurDate'
-      version: '0.01'
+      version: '0.02'
     -
       class: Dist::Zilla::Plugin::PodWeaver
       config:
@@ -192,7 +202,7 @@ x_Dist_Zilla:
             -
               class: Pod::Weaver::Plugin::Rinci
               name: '@Author::PERLANCAR/Rinci'
-              version: '0.21'
+              version: '0.25'
             -
               class: Pod::Weaver::Section::Leftovers
               name: '@Author::PERLANCAR/Leftovers'
@@ -204,11 +214,11 @@ x_Dist_Zilla:
             -
               class: Pod::Weaver::Section::Completion::GetoptLongComplete
               name: '@Author::PERLANCAR/Completion::GetoptLongComplete'
-              version: '0.04'
+              version: '0.05'
             -
               class: Pod::Weaver::Section::Completion::PerinciCmdLine
               name: '@Author::PERLANCAR/Completion::PerinciCmdLine'
-              version: '0.07'
+              version: '0.08'
             -
               class: Pod::Weaver::Section::Homepage::DefaultCPAN
               name: '@Author::PERLANCAR/Homepage::DefaultCPAN'

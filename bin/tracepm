@@ -3,8 +3,8 @@
 # Note: This script is a CLI interface to Riap function /App/tracepm/tracepm
 # and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.03
 
-our $DATE = '2014-12-05'; # DATE
-our $VERSION = '0.10'; # VERSION
+our $DATE = '2014-12-26'; # DATE
+our $VERSION = '0.11'; # VERSION
 
 use 5.010001;
 use strict;
@@ -17,7 +17,7 @@ Perinci::CmdLine::Any->new(
     log => 1,
 )->run;
 
-# ABSTRACT: tracepm
+# ABSTRACT: Trace dependencies of your Perl script
 # PODNAME: tracepm
 
 __END__
@@ -28,11 +28,11 @@ __END__
 
 =head1 NAME
 
-tracepm - tracepm
+tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.10 of tracepm (from Perl distribution App-tracepm), released on 2014-12-05.
+This document describes version 0.11 of tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
 
 =head1 SYNOPSIS
 
@@ -100,15 +100,15 @@ Set configuration profile to use.
 
 =item B<--debug>
 
-Set log level to 'debug'.
+Set log level to debug.
 
 =item B<--format>=I<s>
 
-Set output format.
+Choose output format, e.g. json, text.
 
 =item B<--help>, B<-h>, B<-?>
 
-Show help message.
+Display this help message.
 
 =item B<--json>
 
@@ -171,11 +171,10 @@ By default, when outputing as JSON, the full enveloped result is returned, e.g.:
 The reason is so you can get the status (1st element), status message (2nd
 element) as well as result metadata/extra result (4th element) instead of just
 the result (3rd element). However, sometimes you want just the result, e.g. when
-you want to pipe the result for more post-processing:
+you want to pipe the result for more post-processing. In this case you can use
+`--naked-res` so you just get:
 
     [1,2,3]
-
-In this case, you can use `--naked-res`.
 
 
 =item B<--no-config>
@@ -192,7 +191,7 @@ version. See Module::CoreList for more details.
 
 =item B<--quiet>
 
-Set log level to 'error'.
+Set log level to quiet.
 
 =item B<--recurse-exclude-core>
 
@@ -232,7 +231,7 @@ Path to script file (script to be packed).
 
 =item B<--trace>
 
-Set log level to 'trace'.
+Set log level to trace.
 
 =item B<--use-json>=I<s>
 
@@ -253,11 +252,9 @@ Can be specified multiple times.
 
 =item B<--verbose>
 
-Set log level to 'info'.
+Set log level to info.
 
 =item B<--version>, B<-v>
-
-Show program version.
 
 =back
 
@@ -279,15 +276,7 @@ To activate bash completion for this script, put:
 
 in your bash startup (e.g. C<~/.bashrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
 
-You can also install L<App::BashCompletionProg> which makes it easy to add completion for Perinci::CmdLine-based scripts. After you install the module and put C<. ~/.bash-complete-prog> (or C<. /etc/bash-complete-prog>), you can just run C<bash-completion-prog> and the C<complete> command will be added to your C<~/.bash-completion-prog>. Your next shell session will then recognize tab completion for the command.
-
-=head2 fish
-
-To activate fish completion for this script, execute:
-
- begin; set -lx COMP_SHELL fish; set -lx COMP_MODE gen_command; tracepm; end > $HOME/.config/fish/completions/tracepm.fish
-
-Or if you want to install globally, you can instead write the generated script to C</etc/fish/completions/tracepm.fish> or C</usr/share/fish/completions/tracepm.fish>. The exact path might be different on your system. Please check your C<fish_complete_path> variable.
+It is recommended, however, that you install L<shcompgen> which allows you to activate completion scripts for several kinds of scripts on multiple shells. Some CPAN distributions (those that are built with L<Dist::Zilla::Plugin::GenShellCompletion>) will even automatically enable shell completion for their included scripts (using C<shcompgen>) at installation time, so you can immadiately have tab completion.
 
 =head2 tcsh
 
@@ -297,15 +286,11 @@ To activate tcsh completion for this script, put:
 
 in your tcsh startup (e.g. C<~/.tcshrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
 
-=head2 zsh
+It is also recommended to install C<shcompgen> (see above).
 
-To activate zsh completion for this script, put:
+=head2 other shells
 
- _tracepm() { read -l; local cl="$REPLY"; read -ln; local cp="$REPLY"; reply=(`COMP_SHELL=zsh COMP_LINE="$cl" COMP_POINT="$cp" tracepm`) }
-
- compctl -K _tracepm tracepm
-
-in your zsh startup (e.g. C<~/.zshrc>). Your next shell session will then recognize tab completion for the command. Or, you can also directly execute the line above in your shell to activate immediately.
+For fish and zsh, install C<shcompgen> as described above.
 
 =head1 HOMEPAGE
 

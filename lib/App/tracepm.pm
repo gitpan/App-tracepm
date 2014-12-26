@@ -1,7 +1,7 @@
 package App::tracepm;
 
-our $DATE = '2014-12-05'; # DATE
-our $VERSION = '0.10'; # VERSION
+our $DATE = '2014-12-26'; # DATE
+our $VERSION = '0.11'; # VERSION
 
 use 5.010001;
 use strict;
@@ -30,6 +30,7 @@ our $tablespec = {
 
 $SPEC{tracepm} = {
     v => 1.1,
+    summary => 'Trace dependencies of your Perl script',
     args => {
         script => {
             summary => 'Path to script file (script to be packed)',
@@ -359,7 +360,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.10 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-05.
+This document describes version 0.11 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
 
 =head1 SYNOPSIS
 
@@ -369,6 +370,8 @@ This distribution provides command-line utility called L<tracepm>.
 
 
 =head2 tracepm(%args) -> [status, msg, result, meta]
+
+Trace dependencies of your Perl script.
 
 Arguments ('*' denotes required arguments):
 
