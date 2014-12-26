@@ -1,7 +1,7 @@
 package App::tracepm;
 
 our $DATE = '2014-12-26'; # DATE
-our $VERSION = '0.11'; # VERSION
+our $VERSION = '0.12'; # VERSION
 
 use 5.010001;
 use strict;
@@ -235,7 +235,7 @@ sub tracepm {
     } elsif ($method =~ /\A(?:prereqscanner|prereqscanner_lite)(_recurse)?\z/) {
 
         require CHI;
-        require Module::Path;
+        require Module::Path::More;
 
         my @recurse_blacklist = (
             'Module::List', # segfaults on my pc
@@ -270,7 +270,7 @@ sub tracepm {
                 {
                     last unless $recurse;
                     last MOD if $seen_mods{$mod}++;
-                    my $path = Module::Path::module_path($mod);
+                    my $path = Module::Path::More::module_path(module=>$mod);
                     unless ($path) {
                         $log->infof("Skipped recursing to %s: path not found", $mod);
                         last;
@@ -360,7 +360,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.11 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
+This document describes version 0.12 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
 
 =head1 SYNOPSIS
 

@@ -34,7 +34,7 @@
             "CHI" : "0",
             "Log::Any" : "0",
             "Module::CoreList" : "2.99",
-            "Module::Path" : "0",
+            "Module::Path::More" : "0",
             "Module::XSOrPP" : "0",
             "Perinci::CmdLine::Any" : "0.06",
             "Perl::PrereqScanner" : "0",
@@ -65,7 +65,7 @@
          "web" : "https://github.com/perlancar/perl-App-tracepm"
       }
    },
-   "version" : "0.11",
+   "version" : "0.12",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.018002"

@@ -28,7 +28,7 @@ my %WriteMakefileArgs = (
     "CHI" => 0,
     "Log::Any" => 0,
     "Module::CoreList" => "2.99",
-    "Module::Path" => 0,
+    "Module::Path::More" => 0,
     "Module::XSOrPP" => 0,
     "Perinci::CmdLine::Any" => "0.06",
     "Perl::PrereqScanner" => 0,
@@ -42,7 +42,7 @@ my %WriteMakefileArgs = (
     "IPC::Open3" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.11",
+  "VERSION" => "0.12",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -58,7 +58,7 @@ my %FallbackPrereqs = (
   "IPC::Open3" => 0,
   "Log::Any" => 0,
   "Module::CoreList" => "2.99",
-  "Module::Path" => 0,
+  "Module::Path::More" => 0,
   "Module::XSOrPP" => 0,
   "Perinci::CmdLine::Any" => "0.06",
   "Perl::PrereqScanner" => 0,

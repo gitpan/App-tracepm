@@ -4,7 +4,7 @@
 # and generated automatically using Dist::Zilla::Plugin::Rinci::ScriptFromFunc version 0.03
 
 our $DATE = '2014-12-26'; # DATE
-our $VERSION = '0.11'; # VERSION
+our $VERSION = '0.12'; # VERSION
 
 use 5.010001;
 use strict;
@@ -32,7 +32,7 @@ tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.11 of tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
+This document describes version 0.12 of tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
 
 =head1 SYNOPSIS
 
