@@ -1,7 +1,7 @@
 package App::tracepm;
 
-our $DATE = '2014-12-26'; # DATE
-our $VERSION = '0.12'; # VERSION
+our $DATE = '2014-12-28'; # DATE
+our $VERSION = '0.13'; # VERSION
 
 use 5.010001;
 use strict;
@@ -9,8 +9,7 @@ use warnings;
 use experimental 'smartmatch';
 use Log::Any '$log';
 
-use Module::CoreList;
-use Module::XSOrPP qw(is_xs);
+use File::Temp qw(tempfile);
 use version;
 
 our %SPEC;
@@ -35,8 +34,14 @@ $SPEC{tracepm} = {
         script => {
             summary => 'Path to script file (script to be packed)',
             schema => ['str*'],
-            req => 1,
             pos => 0,
+            tags => ['category:input'],
+        },
+        eval => {
+            summary => 'Specify script from command-line instead',
+            schema  => 'str*',
+            cmdline_aliases => {e=>{}},
+            tags => ['category:input'],
         },
         method => {
             summary => 'Tracing method to use',
@@ -156,12 +161,22 @@ _
 sub tracepm {
     my %args = @_;
 
+    my $script = $args{script};
+    unless (defined $script) {
+        my $eval = $args{eval};
+        defined($eval) or die "Please specify input script or --eval (-e)\n";
+        my ($fh, $filename) = tempfile();
+        print $fh $eval;
+        $script = $filename;
+    }
+
     my $method = $args{method};
     my $plver = version->parse($args{perl_version} // $^V);
 
     my $add_fields_and_filter_1 = sub {
         my $r = shift;
         if ($args{detail} || defined($args{core})) {
+            require Module::CoreList;
             my $is_core = Module::CoreList::is_core(
                 $r->{module}, undef, $plver);
             return 0 if defined($args{core}) && ($args{core} xor $is_core);
@@ -169,7 +184,8 @@ sub tracepm {
         }
 
         if ($args{detail} || defined($args{xs})) {
-            my $is_xs = is_xs($r->{module});
+            require Module::XSOrPP;
+            my $is_xs = Module::XSOrPP::is_xs($r->{module});
             return 0 if defined($args{xs}) && (
                 !defined($is_xs) || ($args{xs} xor $is_xs));
             $r->{is_xs} = $is_xs;
@@ -180,8 +196,7 @@ sub tracepm {
     my @res;
     if ($method =~ /\A(fatpacker|require)\z/) {
 
-        require File::Temp;
-        my ($outfh, $outf) = File::Temp::tempfile();
+        my ($outfh, $outf) = tempfile();
 
         if ($method eq 'fatpacker') {
             require App::FatPacker;
@@ -189,14 +204,14 @@ sub tracepm {
             $fp->trace(
                 output => ">>$outf",
                 use    => $args{use},
-                args   => [$args{script}, @{$args{args} // []}],
+                args   => [$script, @{$args{args} // []}],
             );
         } else {
             # 'require' method
             system($^X,
                    "-MApp::tracepm::Tracer=$outf",
                    (map {"-M$_"} @{$args{use} // []}),
-                   $args{script}, @{$args{args} // []},
+                   $script, @{$args{args} // []},
                );
         }
 
@@ -294,6 +309,7 @@ sub tracepm {
                         }
                     }
                     if ($args{recurse_exclude_core}) {
+                        require Module::CoreList;
                         my $is_core = Module::CoreList::is_core(
                             $mod, undef, $plver); # XXX use $v?
                         if ($is_core) {
@@ -301,7 +317,8 @@ sub tracepm {
                         }
                     }
                     if ($args{recurse_exclude_xs}) {
-                        my $is_xs = is_xs($mod);
+                        require Module::XSOrPP;
+                        my $is_xs = Module::XSOrPP::is_xs($mod);
                         if ($is_xs) {
                             $log->infof("Skipped recursing to %s: XS module", $mod);
                             last;
@@ -328,7 +345,7 @@ sub tracepm {
             require Perl::PrereqScanner::Lite;
             $scanner = Perl::PrereqScanner::Lite->new;
         }
-        $scan->($args{script});
+        $scan->($script);
 
     } else {
 
@@ -360,7 +377,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.12 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-26.
+This document describes version 0.13 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-28.
 
 =head1 SYNOPSIS
 
@@ -392,6 +409,10 @@ Filter only modules that are in core.
 =item * B<detail> => I<bool> (default: 0)
 
 Whether to return records instead of just module names.
+
+=item * B<eval> => I<str>
+
+Specify script from command-line instead.
 
 =item * B<method> => I<str> (default: "fatpacker")
 
@@ -453,7 +474,7 @@ When recursing, exclude some module patterns.
 
 When recursing, exclude XS modules.
 
-=item * B<script>* => I<str>
+=item * B<script> => I<str>
 
 Path to script file (script to be packed).
 
@@ -502,7 +523,7 @@ Please visit the project's homepage at L<https://metacpan.org/release/App-tracep
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/perlancar/perl-App-tracepm>.
+Source repository is at L<https://github.com/sharyanto/perl-App-tracepm>.
 
 =head1 BUGS
 

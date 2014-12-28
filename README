@@ -2,8 +2,8 @@ NAME
     App::tracepm - Trace dependencies of your Perl script
 
 VERSION
-    This document describes version 0.12 of App::tracepm (from Perl
-    distribution App-tracepm), released on 2014-12-26.
+    This document describes version 0.13 of App::tracepm (from Perl
+    distribution App-tracepm), released on 2014-12-28.
 
 SYNOPSIS
     This distribution provides command-line utility called tracepm.
@@ -29,6 +29,10 @@ FUNCTIONS
     *   detail => *bool* (default: 0)
 
         Whether to return records instead of just module names.
+
+    *   eval => *str*
+
+        Specify script from command-line instead.
 
     *   method => *str* (default: "fatpacker")
 
@@ -89,7 +93,7 @@ FUNCTIONS
 
         When recursing, exclude XS modules.
 
-    *   script* => *str*
+    *   script => *str*
 
         Path to script file (script to be packed).
 
@@ -128,7 +132,7 @@ HOMEPAGE
     <https://metacpan.org/release/App-tracepm>.
 
 SOURCE
-    Source repository is at <https://github.com/perlancar/perl-App-tracepm>.
+    Source repository is at <https://github.com/sharyanto/perl-App-tracepm>.
 
 BUGS
     Please report any bugs or feature requests on the bugtracker website
