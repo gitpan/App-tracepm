@@ -1,7 +1,7 @@
 package App::tracepm;
 
-our $DATE = '2014-12-28'; # DATE
-our $VERSION = '0.13'; # VERSION
+our $DATE = '2015-01-03'; # DATE
+our $VERSION = '0.14'; # VERSION
 
 use 5.010001;
 use strict;
@@ -377,7 +377,7 @@ App::tracepm - Trace dependencies of your Perl script
 
 =head1 VERSION
 
-This document describes version 0.13 of App::tracepm (from Perl distribution App-tracepm), released on 2014-12-28.
+This document describes version 0.14 of App::tracepm (from Perl distribution App-tracepm), released on 2015-01-03.
 
 =head1 SYNOPSIS
 
@@ -394,7 +394,7 @@ Arguments ('*' denotes required arguments):
 
 =over 4
 
-=item * B<args> => I<array>
+=item * B<args> => I<array[str]>
 
 Script arguments.
 
@@ -458,7 +458,7 @@ Perl version, defaults to current running version.
 This is for determining which module is core (the list differs from version to
 version. See Module::CoreList for more details.
 
-=item * B<recurse_exclude> => I<array>
+=item * B<recurse_exclude> => I<array[str]>
 
 When recursing, exclude some modules.
 
@@ -466,7 +466,7 @@ When recursing, exclude some modules.
 
 When recursing, exclude core modules.
 
-=item * B<recurse_exclude_pattern> => I<array>
+=item * B<recurse_exclude_pattern> => I<array[str]>
 
 When recursing, exclude some module patterns.
 
@@ -478,7 +478,7 @@ When recursing, exclude XS modules.
 
 Path to script file (script to be packed).
 
-=item * B<use> => I<array>
+=item * B<use> => I<array[str]>
 
 Additional modules to "use".
 
@@ -492,8 +492,6 @@ Filter only modules that are XS modules.
 
 =back
 
-Return value:
-
 Returns an enveloped result (an array).
 
 First element (status) is an integer containing HTTP status code
@@ -503,19 +501,8 @@ First element (status) is an integer containing HTTP status code
 element (meta) is called result metadata and is optional, a hash
 that contains extra information.
 
- (any)
-
+Return value:  (any)
 =for Pod::Coverage ^()$
-
-=head1 TODO
-
-=over
-
-=item * 'use' args not yet respected if 'method' =~ /prereqscanner/
-
-=item * Option to silent STDOUT and/or STDERR output of script.
-
-=back
 
 =head1 HOMEPAGE
 
@@ -539,7 +526,7 @@ perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by perlancar@cpan.org.
+This software is copyright (c) 2015 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

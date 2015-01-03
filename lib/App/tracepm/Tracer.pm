@@ -1,6 +1,6 @@
 package App::tracepm::Tracer;
 
-our $VERSION = '0.13'; # VERSION
+our $VERSION = '0.14'; # VERSION
 
 # saving CORE::GLOBAL::require doesn't work
 my $orig_require;
@@ -60,7 +60,7 @@ App::tracepm::Tracer - Trace module require to file
 
 =head1 VERSION
 
-This document describes version 0.13 of App::tracepm::Tracer (from Perl distribution App-tracepm), released on 2014-12-28.
+This document describes version 0.14 of App::tracepm::Tracer (from Perl distribution App-tracepm), released on 2015-01-03.
 
 =head1 HOMEPAGE
 
@@ -84,7 +84,7 @@ perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2014 by perlancar@cpan.org.
+This software is copyright (c) 2015 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
